@@ -1,5 +1,5 @@
 {
-  "name": "typescript-npm-package-template",
+  "name": "@tincre/logger",
   "version": "0.0.0-development",
   "description": "A template for creating npm packages using TypeScript and VSCode",
   "main": "./lib/index.js",
@@ -19,22 +19,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ryansonshine/typescript-npm-package-template.git"
+    "url": "https://github.com/Tincre/logger"
   },
   "license": "MIT",
   "author": {
-    "name": "Ryan Sonshine",
-    "email": "ryansonshine@users.noreply.github.com",
-    "url": "https://github.com/ryansonshine"
+    "name": "Jason R. Stevens, CFA",
+    "email": "jason@tincre.com",
+    "url": "https://github.com/thinkjrs"
   },
   "engines": {
-    "node": ">=12.0"
+    "node": ">=20.0"
   },
   "keywords": [
-    "boilerplate",
-    "template",
+    "logging",
     "typescript",
-    "vscode",
     "jest",
     "husky",
     "commitizen",
@@ -42,9 +40,9 @@
     "codecov"
   ],
   "bugs": {
-    "url": "https://github.com/ryansonshine/typescript-npm-package-template/issues"
+    "url": "https://github.com/Tincre/logger/issues"
   },
-  "homepage": "https://github.com/ryansonshine/typescript-npm-package-template#readme",
+  "homepage": "https://tincre.com",
   "devDependencies": {
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
