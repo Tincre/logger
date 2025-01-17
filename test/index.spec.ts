@@ -1,13 +1,33 @@
-import { myPackage } from '../src';
+import { logger } from '../src/index';
 
-describe('index', () => {
-  describe('myPackage', () => {
-    it('should return a string containing the message', () => {
-      const message = 'Hello';
+describe('Logger', () => {
+  let consoleLogSpy: jest.SpyInstance;
 
-      const result = myPackage(message);
+  beforeEach(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+  });
 
-      expect(result).toMatch(message);
-    });
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it("should log a message when NODE_ENV is not 'production'", () => {
+    process.env.NODE_ENV = 'development';
+    const message = 'Test log message';
+
+    logger.log(message);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\[LOG\] .*: Test log message/)
+    );
+  });
+
+  it("should not log a message when NODE_ENV is 'production'", () => {
+    process.env.NODE_ENV = 'production';
+    const message = 'Test log message';
+
+    logger.log(message);
+
+    expect(consoleLogSpy).not.toHaveBeenCalled();
   });
 });
