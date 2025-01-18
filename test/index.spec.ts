@@ -20,7 +20,19 @@ describe('Logger', () => {
     consoleDebugSpy.mockRestore();
   });
 
-  it("should log a message when NODE_ENV is not 'production'", () => {
+  it("should log a message with an optional parameter when NODE_ENV is not 'production'", () => {
+    process.env.NODE_ENV = 'development';
+    const message = 'Test log message';
+    const additionalParam = { key: 'value' };
+
+    logger.log(message, additionalParam);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\[LOG\] .*: Test log message \{"key":"value"\}/)
+    );
+  });
+
+  it("should log a message without an optional parameter when NODE_ENV is not 'production'", () => {
     process.env.NODE_ENV = 'development';
     const message = 'Test log message';
 
@@ -31,72 +43,55 @@ describe('Logger', () => {
     );
   });
 
-  it("should not log a message when NODE_ENV is 'production'", () => {
-    process.env.NODE_ENV = 'production';
-    const message = 'Test log message';
-
-    logger.log(message);
-
-    expect(consoleLogSpy).not.toHaveBeenCalled();
-  });
-
-  it("should warn a message when NODE_ENV is not 'production'", () => {
+  it("should warn a message with an optional parameter when NODE_ENV is not 'production'", () => {
     process.env.NODE_ENV = 'development';
     const message = 'Test warn message';
+    const additionalParam = [1, 2, 3];
 
-    logger.warn(message);
+    logger.warn(message, additionalParam);
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/\[WARN\] .*: Test warn message/)
+      expect.stringMatching(/\[WARN\] .*: Test warn message \[1,2,3\]/)
     );
   });
 
-  it("should not warn a message when NODE_ENV is 'production'", () => {
-    process.env.NODE_ENV = 'production';
-    const message = 'Test warn message';
-
-    logger.warn(message);
-
-    expect(consoleWarnSpy).not.toHaveBeenCalled();
-  });
-
-  it("should error a message when NODE_ENV is not 'production'", () => {
+  it("should error a message with an optional parameter when NODE_ENV is not 'production'", () => {
     process.env.NODE_ENV = 'development';
     const message = 'Test error message';
+    const additionalParam = 'extra details';
 
-    logger.error(message);
+    logger.error(message, additionalParam);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/\[ERROR\] .*: Test error message/)
+      expect.stringMatching(/\[ERROR\] .*: Test error message extra details/)
     );
   });
 
-  it("should not error a message when NODE_ENV is 'production'", () => {
-    process.env.NODE_ENV = 'production';
-    const message = 'Test error message';
-
-    logger.error(message);
-
-    expect(consoleErrorSpy).not.toHaveBeenCalled();
-  });
-
-  it("should debug a message when NODE_ENV is not 'production'", () => {
+  it("should debug a message with an optional parameter when NODE_ENV is not 'production'", () => {
     process.env.NODE_ENV = 'development';
     const message = 'Test debug message';
+    const additionalParam = { debug: true };
 
-    logger.debug(message);
+    logger.debug(message, additionalParam);
 
     expect(consoleDebugSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/\[DEBUG\] .*: Test debug message/)
+      expect.stringMatching(/\[DEBUG\] .*: Test debug message \{"debug":true\}/)
     );
   });
 
-  it("should not debug a message when NODE_ENV is 'production'", () => {
+  it("should not log, warn, error, or debug a message when NODE_ENV is 'production'", () => {
     process.env.NODE_ENV = 'production';
-    const message = 'Test debug message';
+    const message = 'Test message';
+    const additionalParam = { ignored: true };
 
-    logger.debug(message);
+    logger.log(message, additionalParam);
+    logger.warn(message, additionalParam);
+    logger.error(message, additionalParam);
+    logger.debug(message, additionalParam);
 
+    expect(consoleLogSpy).not.toHaveBeenCalled();
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
     expect(consoleDebugSpy).not.toHaveBeenCalled();
   });
 });
