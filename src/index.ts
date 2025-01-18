@@ -35,8 +35,12 @@
  *
  * The logger object aggregates these functions for easy access.
  */
+type LoggerFunction = (message: string, data?: unknown) => void;
 
-export const logger = {
+export const logger: Record<
+  'debug' | 'log' | 'error' | 'warn',
+  LoggerFunction
+> = {
   debug: debugMessage,
   log: logMessage,
   error: errorMessage,
