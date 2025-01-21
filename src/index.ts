@@ -28,67 +28,56 @@
  * Each log message is prefixed with a timestamp and a label indicating the log level.
  *
  * Functions:
- * - `logMessage(message: string): void`: Logs a standard message.
- * - `errorMessage(message: string): void`: Logs an error message.
- * - `warnMessage(message: string): void`: Logs a warning message.
- * - `debugMessage(message: string): void`: Logs a debug message.
+ * - `logMessage(message: string, data?: unknown): void`: Logs a standard message.
+ * - `errorMessage(message: string, data?: unknown): void`: Logs an error message.
+ * - `warnMessage(message: string, data?: unknown): void`: Logs a warning message.
+ * - `debugMessage(message: string, data?: unknown): void`: Logs a debug message.
  *
  * The logger object aggregates these functions for easy access.
  */
+type LoggerFunction = (message: string, data?: unknown) => void;
 
-export const logger = {
+export const logger: Record<
+  'debug' | 'log' | 'error' | 'warn',
+  LoggerFunction
+> = {
   debug: debugMessage,
   log: logMessage,
   error: errorMessage,
   warn: warnMessage,
 };
-/**
- * Logs a message to the console if the NODE_ENV is not set to "production".
- *
- * @param message - The message to be logged.
- * @returns {void}
- */
-function logMessage(message: string): void {
+
+function formatMessage(level: string, message: string, data?: unknown): string {
+  const timestamp = new Date().toISOString();
+  const formattedData =
+    data !== undefined
+      ? typeof data === 'object'
+        ? ` ${JSON.stringify(data)}`
+        : ` ${String(data)}`
+      : '';
+  return `[${level.toUpperCase()}] ${timestamp}: ${message}${formattedData}`;
+}
+
+function logMessage(message: string, data?: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`[LOG] ${new Date().toISOString()}: ${message}`);
+    console.log(formatMessage('LOG', message, data));
   }
 }
 
-/**
- * Logs an error message to the console if the NODE_ENV is not set to "production".
- *
- * @param message - The error message to be logged.
- * @returns {void}
- *
- * @example
- * errorMessage("Failed to connect to the database");
- */
-function errorMessage(message: string): void {
+function errorMessage(message: string, data?: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.error(`[ERROR] ${new Date().toISOString()}: ${message}`);
+    console.error(formatMessage('ERROR', message, data));
   }
 }
 
-/**
- * Logs a warning message to the console if the NODE_ENV is not set to "production".
- *
- * @param message - The warning message to be logged.
- * @returns {void}
- */
-function warnMessage(message: string): void {
+function warnMessage(message: string, data?: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.warn(`[WARN] ${new Date().toISOString()}: ${message}`);
+    console.warn(formatMessage('WARN', message, data));
   }
 }
 
-/**
- * Logs a debug message to the console if the NODE_ENV is not set to "production".
- *
- * @param message - The debug message to be logged.
- * @returns {void}
- */
-function debugMessage(message: string): void {
+function debugMessage(message: string, data?: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.debug(`[DEBUG] ${new Date().toISOString()}: ${message}`);
+    console.debug(formatMessage('DEBUG', message, data));
   }
 }
