@@ -1,0 +1,37 @@
+name: Code Coverage
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5.1.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # Set in GitHub repository secrets
+          files: ./coverage/lcov.info # Adjust path if necessary
+          flags: unittests # Optional flags for tracking different types of tests
+          name: codecov-coverage-report # Optional, useful for identifying reports
+          fail_ci_if_error: true # Fails CI if Codecov upload fails
