@@ -31,7 +31,4 @@ jobs:
         uses: codecov/codecov-action@v5.1.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # Set in GitHub repository secrets
-          files: ./coverage/lcov.info # Adjust path if necessary
-          flags: unittests # Optional flags for tracking different types of tests
-          name: codecov-coverage-report # Optional, useful for identifying reports
-          fail_ci_if_error: true # Fails CI if Codecov upload fails
+          slug: Tincre/logger
