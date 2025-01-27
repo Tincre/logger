@@ -1,2 +1,7 @@
 export { logger, Logger } from './logger';
-export { createLoggerConfig, LoggerConfig, LogLevel } from './config';
+export {
+  createLoggerConfig,
+  LoggerConfig,
+  LogLevel,
+  LOG_LEVELS,
+} from './config';
