@@ -1,7 +1,7 @@
 {
   "name": "@tincre/logger",
-  "version": "0.0.5",
-  "description": "A template for creating npm packages using TypeScript and VSCode",
+  "version": "0.0.6",
+  "description": "A basic logging utility for TypeScript and JavaScript projects.",
   "main": "./lib/index.js",
   "files": [
     "lib/**/*"
