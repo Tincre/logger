@@ -3,9 +3,8 @@
  *
  * This module provides a simple logging utility for the application. It includes
  * functions to log messages of different severity levels: debug, log, error, and warn.
- * The logging functions output messages to the console, but only when the application
- * is not running in a production environment. This is controlled by checking the
- * `NODE_ENV` environment variable.
+ * The logging functions output messages to the console, but only when allowed by the
+ * provided configuration. This is controlled by the `LoggerConfig` object.
  *
  * The logger is designed to help developers track the flow of the application and
  * diagnose issues during development and testing. By suppressing log output in
@@ -14,70 +13,111 @@
  *
  * Usage:
  *
- * Import the logger and use the appropriate method to log messages:
+ * Import and use the default logger or instantiate a custom one:
  *
  * ```typescript
- * import { logger } from './logger';
+ * import { logger, Logger, LoggerConfig } from '@tincre/logger';
  *
  * logger.log('This is a log message');
  * logger.error('This is an error message');
  * logger.warn('This is a warning message');
  * logger.debug('This is a debug message');
+ *
+ * const customLogger = new Logger({ logLevel: 'debug', isProduction: false });
+ * customLogger.log('This is a custom log message');
  * ```
  *
  * Each log message is prefixed with a timestamp and a label indicating the log level.
  *
- * Functions:
- * - `logMessage(message: string, data?: unknown): void`: Logs a standard message.
- * - `errorMessage(message: string, data?: unknown): void`: Logs an error message.
- * - `warnMessage(message: string, data?: unknown): void`: Logs a warning message.
- * - `debugMessage(message: string, data?: unknown): void`: Logs a debug message.
+ * Class:
+ * - `Logger(config?: Partial<LoggerConfig>)`: Creates a new logger instance with the given configuration.
  *
- * The logger object aggregates these functions for easy access.
+ * Methods:
+ * - `log(message: string, data?: unknown): void`: Logs a standard message.
+ * - `error(message: string, data?: unknown): void`: Logs an error message.
+ * - `warn(message: string, data?: unknown): void`: Logs a warning message.
+ * - `debug(message: string, data?: unknown): void`: Logs a debug message.
  */
-type LoggerFunction = (message: string, data?: unknown) => void;
 
-export const logger: Record<
-  'debug' | 'log' | 'error' | 'warn',
-  LoggerFunction
-> = {
-  debug: debugMessage,
-  log: logMessage,
-  error: errorMessage,
-  warn: warnMessage,
-};
+// src/config.ts
+export const LOG_LEVELS = ['debug', 'log', 'warn', 'error'] as const;
+export type LogLevel = (typeof LOG_LEVELS)[number];
 
-function formatMessage(level: string, message: string, data?: unknown): string {
-  const timestamp = new Date().toISOString();
-  const formattedData =
-    data !== undefined
-      ? typeof data === 'object'
-        ? ` ${JSON.stringify(data)}`
-        : ` ${String(data)}`
+export interface LoggerConfig {
+  logLevel: LogLevel;
+  isProduction: boolean;
+}
+
+export function createLoggerConfig(
+  config: Partial<LoggerConfig> = {}
+): LoggerConfig {
+  return {
+    logLevel:
+      config.logLevel && LOG_LEVELS.includes(config.logLevel)
+        ? config.logLevel
+        : 'debug',
+    isProduction: config.isProduction ?? false,
+  };
+}
+
+export class Logger {
+  private config: LoggerConfig;
+
+  constructor(config: Partial<LoggerConfig> = {}) {
+    this.config = createLoggerConfig(config);
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    return (
+      LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf(this.config.logLevel)
+    );
+  }
+
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    data?: Record<string, unknown> | string | number | boolean
+  ): string {
+    const timestamp = new Date().toISOString();
+
+    const formattedData = data
+      ? ` ${typeof data === 'object' ? JSON.stringify(data) : String(data)}`
       : '';
-  return `[${level.toUpperCase()}] ${timestamp}: ${message}${formattedData}`;
-}
+    return `[${level.toUpperCase()}] ${timestamp}: ${message}${formattedData}`;
+  }
 
-function logMessage(message: string, data?: unknown): void {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(formatMessage('LOG', message, data));
+  log(
+    message: string,
+    data?: Record<string, unknown> | string | number | boolean
+  ): void {
+    if (this.config.isProduction || !this.shouldLog('log')) return;
+    console.log(this.formatMessage('log', message, data));
+  }
+
+  error(
+    message: string,
+    data?: Record<string, unknown> | string | number | boolean
+  ): void {
+    if (this.config.isProduction || !this.shouldLog('error')) return;
+    console.error(this.formatMessage('error', message, data));
+  }
+
+  warn(
+    message: string,
+    data?: Record<string, unknown> | string | number | boolean
+  ): void {
+    if (this.config.isProduction || !this.shouldLog('warn')) return;
+    console.warn(this.formatMessage('warn', message, data));
+  }
+
+  debug(
+    message: string,
+    data?: Record<string, unknown> | string | number | boolean
+  ): void {
+    if (this.config.isProduction || !this.shouldLog('debug')) return;
+    console.debug(this.formatMessage('debug', message, data));
   }
 }
 
-function errorMessage(message: string, data?: unknown): void {
-  if (process.env.NODE_ENV !== 'production') {
-    console.error(formatMessage('ERROR', message, data));
-  }
-}
-
-function warnMessage(message: string, data?: unknown): void {
-  if (process.env.NODE_ENV !== 'production') {
-    console.warn(formatMessage('WARN', message, data));
-  }
-}
-
-function debugMessage(message: string, data?: unknown): void {
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug(formatMessage('DEBUG', message, data));
-  }
-}
+export const logger = new Logger();
+export { LoggerConfig };
